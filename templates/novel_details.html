@@ -1,0 +1,4 @@
+<h2>{{ novel.title }}</h2>
+<p>{{ novel.description }}</p>
+<a href="{{ url_for('download', novel_id=novel.id, format='epub') }}">Download EPUB</a>
+<a href="{{ url_for('download', novel_id=novel.id, format='pdf') }}">Download PDF</a>

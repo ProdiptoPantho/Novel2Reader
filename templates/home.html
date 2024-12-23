@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Welcome to the Web Light Novel Converter</h2>
+    <p>This application allows you to search for light novels and convert them to e-reader formats.</p>
+    <p>
+        {% if current_user.is_authenticated %}
+            <a href="{{ url_for('search') }}" class="btn btn-success">Start Searching</a>
+        {% else %}
+            <a href="{{ url_for('login') }}" class="btn btn-primary">Login</a>
+            <a href="{{ url_for('register') }}" class="btn btn-secondary">Register</a>
+        {% endif %}
+    </p>
+</div>
+{% endblock %}
