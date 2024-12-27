@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container mt-4">
+        <h1>Download Result</h1>
+        <div id="result">
+            {% if url %}
+                <p>Your EPUB file has been uploaded successfully!</p>
+                <p>Download it from the link below:</p>
+                <a href="{{ url }}" class="btn btn-primary">Download EPUB</a>
+            {% else %}
+                <p>Error: {{ error }}</p>
+            {% endif %}
+        </div>
+        <a href="/" class="btn btn-secondary mt-4">Back to Home</a>
+    </div>
+{% endblock %}

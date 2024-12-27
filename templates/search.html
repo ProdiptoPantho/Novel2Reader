@@ -13,13 +13,37 @@
         </div>
         <button type="submit" class="btn btn-success">Search</button>
     </form>
-    <ul class="list-group mt-4">
-        {% for result in results %}
-            <li class="list-group-item">
-                <a href="{{ result.url }}">{{ result.title }}</a>
-                <p>{{ result.info }}</p>
-            </li>
-        {% endfor %}
-    </ul>
+    
+    {% if results %}
+        <ul class="list-group mt-4">
+            {% for result in results %}
+                <li class="list-group-item">
+                    <a href="{{ result.url }}">{{ result.title }}</a>
+                    <p>{{ result.info }}</p>
+                    <button class="btn btn-primary" onclick="promptForRange('{{ result.url }}')">Download</button>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="mt-4">No results found for your search.</p>
+    {% endif %}
 </div>
+
+<script>
+    function promptForRange(url) {
+        const range = prompt("Please enter the chapter range (e.g., 1-10):");
+        if (range) {
+            // Log the URL and range to the console for debugging
+            console.log("URL:", url);
+            console.log("Range:", range);
+            
+            // Redirect to the download route with the URL and chapter range
+            const downloadUrl = `/download?url=${encodeURIComponent(url)}&range=${encodeURIComponent(range)}`;
+            console.log("Redirecting to:", downloadUrl);  // Log the redirect URL
+            window.location.href = downloadUrl;  // Perform the redirect
+        } else {
+            console.log("No range entered.");  // Log if no range was entered
+        }
+    }
+    </script>
 {% endblock %}

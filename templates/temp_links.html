@@ -1,0 +1,38 @@
+<!-- templates/temp_links.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Temporary Links</h2>
+    {% if links %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Link</th>
+                    <th>Expiration Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for link in links %}
+                    <tr>
+                        <td>{{ link.id }}</td>
+                        <td><a href="{{ link.link }}" target="_blank">{{ link.link }}</a></td>
+                        <td>{{ link.expiration_date.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                        <td>
+                            {% if link.is_expired() %}
+                                <span class="text-danger">Expired</span>
+                            {% else %}
+                                <span class="text-success">Active</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No temporary links found.</p>
+    {% endif %}
+</div>
+{% endblock %}
