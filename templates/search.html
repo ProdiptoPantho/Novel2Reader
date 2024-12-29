@@ -20,7 +20,13 @@
                 <li class="list-group-item">
                     <a href="{{ result.url }}">{{ result.title }}</a>
                     <p>{{ result.info }}</p>
-                    <button class="btn btn-primary" onclick="promptForRange('{{ result.url }}')">Download</button>
+                    <!-- Directly show the input field for range -->
+                     <form action="/download" method="POST">
+                        <input type="text" name="url" hidden value="{{ result.url}}">
+                        <input type="text" id="range_{{ loop.index }}" class="form-control mt-2" name="range" placeholder="Enter chapter range (e.g., 1-10)">
+                        <button type="submit" class="btn btn-success mt-2">Submit</button>
+                     </form>
+                    
                 </li>
             {% endfor %}
         </ul>
@@ -30,20 +36,12 @@
 </div>
 
 <script>
-    function promptForRange(url) {
-        const range = prompt("Please enter the chapter range (e.g., 1-10):");
-        if (range) {
-            // Log the URL and range to the console for debugging
-            console.log("URL:", url);
-            console.log("Range:", range);
-            
-            // Redirect to the download route with the URL and chapter range
-            const downloadUrl = `/download?url=${encodeURIComponent(url)}&range=${encodeURIComponent(range)}`;
-            console.log("Redirecting to:", downloadUrl);  // Log the redirect URL
-            window.location.href = downloadUrl;  // Perform the redirect
-        } else {
-            console.log("No range entered.");  // Log if no range was entered
-        }
+    function submitRange(url, index) {
+        const rangeInput = document.getElementById('range_' + index).value;
+        // Here you can handle the submission of the range, e.g., via AJAX or redirect
+        console.log(`Submitting range ${rangeInput} for ${url}`);
+        // Example: You might want to send an AJAX request to your Flask backend
+        // $.post('/download', { url: url, range: rangeInput });
     }
-    </script>
+</script>
 {% endblock %}
