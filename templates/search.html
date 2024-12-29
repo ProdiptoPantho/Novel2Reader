@@ -22,8 +22,9 @@
                     <p>{{ result.info }}</p>
                     <!-- Directly show the input field for range -->
                      <form action="/download" method="POST">
-                        <input type="text" name="url" hidden value="{{ result.url}}">
-                        <input type="text" id="range_{{ loop.index }}" class="form-control mt-2" name="range" placeholder="Enter chapter range (e.g., 1-10)">
+                        <input type="text" name="link" hidden value="{{ result.url }}">
+                        <label for="chapter_range">Chapter Numbers Range:</label>
+                        <input type="text" name="chapter_range" class="form-control" required>
                         <button type="submit" class="btn btn-success mt-2">Submit</button>
                      </form>
                     

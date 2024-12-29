@@ -16,7 +16,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///instance/database.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SECRET_KEY'] = 'your_secret_key'  # Replace with a strong secret key
 db = SQLAlchemy(app)
 
@@ -89,13 +89,13 @@ def search():
 @login_required
 def download():
     if request.method == 'POST':
-        url = request.form["url"]
-        chapter_range = request.form["range"].split("-")
+        link = request.form["link"]
+        chapter_range = request.form['chapter_range']
 
         # Generate a more descriptive name for the output directory
         timestamp = int(time.time())  # Get the current timestamp
         name = f"novel_{timestamp}"  # Create a name based on the timestamp
-        downloads_dir = os.path.normpath(os.path.join(f"C:\\Users\\22101233\\Novel2Reader", name, "epub"))  # Normalize the path
+        downloads_dir = os.path.normpath(os.path.join(f"C:\\Novel2Reader", name, "epub"))  # Normalize the path
 
         # Cleanup: Remove any previous downloads
         cleanup_previous_downloads(downloads_dir)  # Clean up previous downloads if they exist
@@ -105,7 +105,7 @@ def download():
 
         # Run the lnrawl command
         try:
-            command = f'lncrawl -s "{url}" --range {f"{chapter_range[0]} {chapter_range[1]}"} --format epub -o "{downloads_dir}" --suppress'
+            command = f'lncrawl -s "{link}" --range {chapter_range} --format epub -o "{downloads_dir}" --suppress'
             print(f"Running command: {command}")  # Debugging statement
             subprocess.run(command, shell=True, check=True)
         except subprocess.CalledProcessError as e:
