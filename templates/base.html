@@ -15,7 +15,7 @@
                 {% if current_user.is_authenticated %}
                     <li class="nav-item"><a class="btn btn-secondary ms-3" href="{{ url_for('search') }}">Search</a></li>
                     <li class="nav-item"><a class="btn btn-secondary ms-3" href="{{ url_for('logout') }}">Logout</a></li>
-                    <li><a href="{{ url_for('temp_links') }}" class="btn btn-secondary ms-3">View Download History</a></li>
+                    <!-- <li><a href="{{ url_for('temp_links') }}" class="btn btn-secondary ms-3">View Download History</a></li> -->
                 {% else %}
                     <li class="nav-item"><a class="nav-link text-white" href="{{ url_for('login') }}">Login</a></li>
                     <li class="nav-item"><a class="nav-link text-white" href="{{ url_for('register') }}">Register</a></li>

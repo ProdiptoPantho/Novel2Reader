@@ -4,6 +4,7 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 from forms import RegistrationForm, LoginForm, SearchForm
 from models import db, User, TempLink
 from flask_migrate import Migrate
+import signal
 from crawler import OneKissNovelCrawler  # Ensure this import is correct
 import subprocess  # Import subprocess for running shell commands
 import glob
@@ -97,11 +98,10 @@ def download():
 
         # Generate a more descriptive name for the output directory
         timestamp = int(time.time())  # Get the current timestamp
-        name = "now"  # Create a name based on the timestamp
-        downloads_dir = os.path.normpath(os.path.join(f"C:\\Novel2Reader", name, "epub"))  # Normalize the path
+        name = f"novel_{timestamp}"  # Create a name based on the timestamp
+        downloads_dir = os.path.normpath(os.path.join(f"C:\\Novel2Reader\\download", name, "epub"))  # Normalize the path
 
-        # Cleanup: Remove any previous downloads
-        cleanup_previous_downloads(downloads_dir)  # Clean up previous downloads if they exist
+        
 
         # Create the output directory
         os.makedirs(downloads_dir, exist_ok=True)
@@ -124,7 +124,7 @@ def download():
             zipfile = epub_files[0]  # Get the first EPUB file found
 
             # Upload to temp.sh
-            upload_url = upload_to_temp_sh(zipfile)
+            # upload_url = upload_to_temp_sh(zipfile)
 
             # Store the link and expiration date in the database
             expiration_date = datetime.now() + timedelta(days=3)  # Set expiration to 7 days from now
@@ -133,11 +133,11 @@ def download():
             response = send_file(zipfile, as_attachment=True)  # Serve the file directly for download
 
             # Cleanup the downloads directory after serving the file
-            response.call_on_close(lambda: cleanup_previous_downloads(downloads_dir))
+            
 
             return response
         else:
-            cleanup_previous_downloads(downloads_dir)  # Cleanup if no file found
+            cleanup_previous_downloads(r'C:\Novel2Reader\download')  # Cleanup if no file found
             return render_template('download.html', error='No EPUB files found in the output directory.')
 
 
@@ -177,7 +177,11 @@ def cleanup_previous_downloads(directory):
         print(f"Cleaning up previous downloads in: {directory}")  # Debugging statement
         shutil.rmtree(directory)
 
-
+def signal_handler(sig, frame):
+    cleanup_previous_downloads(r'C:\Novel2Reader\download')
+    os._exit(0)
+    
+signal.signal(signal.SIGINT, signal_handler)
 @app.route('/temp_links', methods=['GET'])
 def temp_links():
     # Retrieve all temporary links from the database

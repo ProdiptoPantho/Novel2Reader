@@ -24,13 +24,17 @@
                     <form action="/download" method="POST">
                         {{ form.hidden_tag() }}  <!-- CSRF token for download form -->
                         <input type="hidden" name="link" value="{{ result.url }}">
-                        <label for="chapter_range">Chapter Numbers Range:</label>
-                        <input type="text" name="chapter_range" class="form-control" required placeholder="e.g., 1-50 or 5-20">
-                        <label for="format">Select format:</label>
-                        <select name="format" id="format" class="form-control">
-                        <option value="epub">EPUB</option>
-                        <option value="pdf">PDF</option>
-                        </select>       
+                        <div class="form-group">
+                            <label for="chapter_range_{{ loop.index }}">Chapter Numbers Range:</label>
+                            <input type="text" id="chapter_range_{{ loop.index }}" name="chapter_range" class="form-control" required placeholder="e.g., 1-50 or 5-20">
+                        </div>
+                        <div class="form-group">
+                            <label for="format_{{ loop.index }}">Select format:</label>
+                            <select name="format" id="format_{{ loop.index }}" class="form-control">
+                                <option value="epub">EPUB</option>
+                                <option value="pdf">PDF</option>
+                            </select>       
+                        </div>
                         {% if download_error and download_error_link == result.url %}
                             <div class="text-danger mt-2">{{ download_error }}</div>
                         {% endif %}
@@ -45,14 +49,15 @@
 </div>
 
 <script>
-  document.getElementById('chapter_range').addEventListener('change', function() {
-    var inputValue = this.value;
-    if (inputValue.includes('-')) {
-      var formattedValue = inputValue.replace('-', ' ');
-      this.value = formattedValue;
-    }
+  document.querySelectorAll('input[name="chapter_range"]').forEach(function(input) {
+    input.addEventListener('input', function() {
+      var inputValue = this.value;
+      if (inputValue.includes('-')) {
+        var formattedValue = inputValue.replace('-', ' ');
+        this.value = formattedValue;
+      }
+    });
   });
 </script>
-
 
 {% endblock %}
