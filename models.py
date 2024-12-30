@@ -11,6 +11,7 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(150), nullable=False)
 
 class TempLink(db.Model):
+    """Model representing a temporary link."""
     id = db.Column(db.Integer, primary_key=True)
     link = db.Column(db.String(255), nullable=False)
     expiration_date = db.Column(db.DateTime, nullable=False)

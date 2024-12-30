@@ -20,14 +20,22 @@
                 <li class="list-group-item">
                     <a href="{{ result.url }}">{{ result.title }}</a>
                     <p>{{ result.info }}</p>
-                    <!-- Directly show the input field for range -->
-                     <form action="/download" method="POST">
-                        <input type="text" name="link" hidden value="{{ result.url }}">
-                        <label for="chapter_range">Chapter Numbers Range:</label>
-                        <input type="text" name="chapter_range" class="form-control" required>
-                        <button type="submit" class="btn btn-success mt-2">Submit</button>
-                     </form>
                     
+                    <form action="/download" method="POST">
+                        {{ form.hidden_tag() }}  <!-- CSRF token for download form -->
+                        <input type="hidden" name="link" value="{{ result.url }}">
+                        <label for="chapter_range">Chapter Numbers Range:</label>
+                        <input type="text" name="chapter_range" class="form-control" required placeholder="e.g., 1-50 or 5-20">
+                        <label for="format">Select format:</label>
+                        <select name="format" id="format" class="form-control">
+                        <option value="epub">EPUB</option>
+                        <option value="pdf">PDF</option>
+                        </select>       
+                        {% if download_error and download_error_link == result.url %}
+                            <div class="text-danger mt-2">{{ download_error }}</div>
+                        {% endif %}
+                        <button type="submit" class="btn btn-success mt-2">Download</button>
+                    </form>
                 </li>
             {% endfor %}
         </ul>
@@ -37,12 +45,14 @@
 </div>
 
 <script>
-    function submitRange(url, index) {
-        const rangeInput = document.getElementById('range_' + index).value;
-        // Here you can handle the submission of the range, e.g., via AJAX or redirect
-        console.log(`Submitting range ${rangeInput} for ${url}`);
-        // Example: You might want to send an AJAX request to your Flask backend
-        // $.post('/download', { url: url, range: rangeInput });
+  document.getElementById('chapter_range').addEventListener('change', function() {
+    var inputValue = this.value;
+    if (inputValue.includes('-')) {
+      var formattedValue = inputValue.replace('-', ' ');
+      this.value = formattedValue;
     }
+  });
 </script>
+
+
 {% endblock %}

@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from forms import RegistrationForm, LoginForm, SearchForm
 from models import db, User, TempLink
+from flask_migrate import Migrate
 from crawler import OneKissNovelCrawler  # Ensure this import is correct
 import subprocess  # Import subprocess for running shell commands
 import glob
@@ -14,6 +15,7 @@ from datetime import datetime, timedelta
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
@@ -91,6 +93,7 @@ def download():
     if request.method == 'POST':
         link = request.form["link"]
         chapter_range = request.form['chapter_range']
+        format = request.form['format']
 
         # Generate a more descriptive name for the output directory
         timestamp = int(time.time())  # Get the current timestamp
@@ -105,7 +108,7 @@ def download():
 
         # Run the lnrawl command
         try:
-            command = f'lncrawl -s "{link}" --range {chapter_range} --format epub -o "{downloads_dir}" --suppress'
+            command = f'lncrawl -s "{link}" --range {chapter_range} --format {format} -o "{downloads_dir}" --suppress'
             print(f"Running command: {command}")  # Debugging statement
             subprocess.run(command, shell=True, check=True)
         except subprocess.CalledProcessError as e:
@@ -124,8 +127,8 @@ def download():
             upload_url = upload_to_temp_sh(zipfile)
 
             # Store the link and expiration date in the database
-            expiration_date = datetime.now() + timedelta(days=7)  # Set expiration to 7 days from now
-            store_link_in_db(upload_url, expiration_date)
+            expiration_date = datetime.now() + timedelta(days=3)  # Set expiration to 7 days from now
+            # store_link_in_db(upload_url, expiration_date)
 
             response = send_file(zipfile, as_attachment=True)  # Serve the file directly for download
 
@@ -181,6 +184,8 @@ def temp_links():
     links = TempLink.query.all()
     return render_template('temp_links.html', links=links)  # Pass links to the template
 
+
+migrate = Migrate(app, db)
 
 if __name__ == '__main__':
     with app.app_context():
