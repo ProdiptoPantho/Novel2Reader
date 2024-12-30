@@ -97,7 +97,7 @@ def download():
 
         # Generate a more descriptive name for the output directory
         timestamp = int(time.time())  # Get the current timestamp
-        name = f"novel_{timestamp}"  # Create a name based on the timestamp
+        name = "now"  # Create a name based on the timestamp
         downloads_dir = os.path.normpath(os.path.join(f"C:\\Novel2Reader", name, "epub"))  # Normalize the path
 
         # Cleanup: Remove any previous downloads
