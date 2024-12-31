@@ -142,12 +142,12 @@ def upload_to_temp_sh(zipfile):
     try:
         # Use curl with the POST method to upload the file
         result = subprocess.run(
-            ['curl', '-X', 'POST', '-F', f'file=@{zipfile}', 'https://temp.sh'],
+            ['curl', '-X', 'PUT', '-F', f'file=@{zipfile}', 'https://temp.sh'],
             capture_output=True,
             text=True,
             check=True  # This will raise an error if the command fails
         )
-        
+        print(f"Result from temp.sh: {result.stdout.strip()}")
         # If the response contains a valid link, return it
         if result.stdout:
             return result.stdout.strip()  # Return the upload link
