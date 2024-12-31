@@ -17,7 +17,6 @@
             <tbody>
                 {% for link in links %}
                     <tr>
-                        <td>{{ link.id }}</td>
                         <td><a href="{{ link.link }}" target="_blank">{{ link.link }}</a></td>
                         <td>{{ link.expiration_date.strftime('%Y-%m-%d %H:%M:%S') }}</td>
                         <td>

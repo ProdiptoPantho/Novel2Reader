@@ -85,3 +85,6 @@ class OneKissNovelCrawler(Crawler):
         soup = self.get_soup(chapter["url"])
         contents = soup.select_one("div.text-left")
         return self.cleaner.extract_contents(contents)
+    
+    
+    

@@ -21,17 +21,11 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SECRET_KEY'] = 'your_secret_key'  # Replace with a strong secret key
-db = SQLAlchemy(app)
+db.init_app(app)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
 
-
-class User(db.Model, UserMixin):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(150), unique=True, nullable=False)
-    email = db.Column(db.String(150), unique=True, nullable=False)
-    password = db.Column(db.String(150), nullable=False)
 
 
 @login_manager.user_loader
@@ -84,11 +78,11 @@ def search():
     if form.validate_on_submit():
         query = form.query.data
         crawler = OneKissNovelCrawler()  # Create an instance of the OneKissNovelCrawler
-        results = crawler.search_novel(query)  # Use the crawler to search for novels
+        results.extend(crawler.search_novel(query))# Use the crawler to search for novels
     return render_template('search.html', form=form, results=results)
 
 
-@app.route('/download', methods=['POST'])
+@app.route('/download', methods=['Get', 'POST'])
 @login_required
 def download():
     if request.method == 'POST':
@@ -124,11 +118,11 @@ def download():
             zipfile = epub_files[0]  # Get the first EPUB file found
 
             # Upload to temp.sh
-            # upload_url = upload_to_temp_sh(zipfile)
+            upload_url = upload_to_temp_sh(zipfile)
 
             # Store the link and expiration date in the database
             expiration_date = datetime.now() + timedelta(days=3)  # Set expiration to 7 days from now
-            # store_link_in_db(upload_url, expiration_date)
+            store_link_in_db(upload_url, expiration_date, current_user.id)
 
             response = send_file(zipfile, as_attachment=True)  # Serve the file directly for download
 
@@ -141,26 +135,52 @@ def download():
             return render_template('download.html', error='No EPUB files found in the output directory.')
 
 
+
+
 def upload_to_temp_sh(zipfile):
-    # Upload the file to temp.sh
+    """Upload the file to temp.sh and return the link."""
     try:
-        result = subprocess.run(['curl', '-F', f'file=@{zipfile}', 'https://temp.sh'], capture_output=True, text=True, check=True)
-        return result.stdout.strip()  # Return the upload link
+        # Use curl with the POST method to upload the file
+        result = subprocess.run(
+            ['curl', '-X', 'POST', '-F', f'file=@{zipfile}', 'https://temp.sh'],
+            capture_output=True,
+            text=True,
+            check=True  # This will raise an error if the command fails
+        )
+        
+        # If the response contains a valid link, return it
+        if result.stdout:
+            return result.stdout.strip()  # Return the upload link
+        else:
+            print("No output from temp.sh.")
+            return None
     except subprocess.CalledProcessError as e:
+        # Handle the case where the curl command fails
         print(f"Upload failed: {e}")
+        print(f"Error Output: {e.stderr}")
+        return None
+    except Exception as e:
+        # Catch any other unexpected exceptions
+        print(f"An unexpected error occurred: {e}")
         return None
 
 
-def store_link_in_db(link, expiration_date):
-    """Store the upload link and its expiration date in the database."""
-    new_link = TempLink(link=link, expiration_date=expiration_date)
+
+def store_link_in_db(link, expiration_date, user_id):
+    """Store the upload link and its expiration date in the database, linked to a user."""
+    new_link = TempLink(link=link, expiration_date=expiration_date, user_id=user_id)
     db.session.add(new_link)
     db.session.commit()
 
 
+
 def get_all_temp_links():
-    """Retrieve all temporary links from the database."""
-    return TempLink.query.all()
+    try:
+        temp_links = TempLink.query.all()
+        return temp_links
+    except Exception as e:
+        print(f"Error retrieving temp links: {e}")
+        return []
 
 
 def cleanup_expired_links():
