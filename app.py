@@ -87,7 +87,9 @@ def search():
 def download():
     if request.method == 'POST':
         link = request.form["link"]
+        novel_name = request.form['novel_name']
         chapter_range = request.form['chapter_range']
+        cr = chapter_range.replace('-', ' ')
         format = request.form['format']
 
         # Generate a more descriptive name for the output directory
@@ -102,7 +104,7 @@ def download():
 
         # Run the lnrawl command
         try:
-            command = f'lncrawl -s "{link}" --range {chapter_range} --format {format} -o "{downloads_dir}" --suppress'
+            command = f'lncrawl -s "{link}" --range {cr} --format {format} -o "{downloads_dir}" --suppress'
             print(f"Running command: {command}")  # Debugging statement
             subprocess.run(command, shell=True, check=True)
         except subprocess.CalledProcessError as e:
@@ -122,7 +124,8 @@ def download():
 
             # Store the link and expiration date in the database
             expiration_date = datetime.now() + timedelta(days=3)  # Set expiration to 7 days from now
-            store_link_in_db(upload_url, expiration_date, current_user.id)
+            
+            store_link_in_db(upload_url, chapter_range, expiration_date, current_user.id, novel_name)
 
             response = send_file(zipfile, as_attachment=True)  # Serve the file directly for download
 
@@ -138,37 +141,27 @@ def download():
 
 
 def upload_to_temp_sh(zipfile):
-    """Upload the file to temp.sh and return the link."""
     try:
-        # Use curl with the POST method to upload the file
+        # Upload the file
         result = subprocess.run(
-            ['curl', '-X', 'PUT', '-F', f'file=@{zipfile}', 'https://temp.sh'],
+            ['curl', '-F', f'file=@{zipfile}', 'https://temp.sh/upload'],
             capture_output=True,
             text=True,
-            check=True  # This will raise an error if the command fails
+            check=True
         )
-        print(f"Result from temp.sh: {result.stdout.strip()}")
-        # If the response contains a valid link, return it
-        if result.stdout:
-            return result.stdout.strip()  # Return the upload link
-        else:
-            print("No output from temp.sh.")
-            return None
+
+        # Save the link to a variable (simulating database)
+        upload_link = result.stdout.strip() if result.stdout else None
+        return upload_link
     except subprocess.CalledProcessError as e:
-        # Handle the case where the curl command fails
-        print(f"Upload failed: {e}")
-        print(f"Error Output: {e.stderr}")
         return None
     except Exception as e:
-        # Catch any other unexpected exceptions
-        print(f"An unexpected error occurred: {e}")
         return None
 
 
-
-def store_link_in_db(link, expiration_date, user_id):
+def store_link_in_db(link, chapter_range, expiration_date, user_id, novel_name):
     """Store the upload link and its expiration date in the database, linked to a user."""
-    new_link = TempLink(link=link, expiration_date=expiration_date, user_id=user_id)
+    new_link = TempLink(novel_name=novel_name, chapter_range=chapter_range, link=link, expiration_date=expiration_date, user_id=user_id)
     db.session.add(new_link)
     db.session.commit()
 
@@ -202,7 +195,10 @@ def signal_handler(sig, frame):
     os._exit(0)
     
 signal.signal(signal.SIGINT, signal_handler)
+
+
 @app.route('/temp_links', methods=['GET'])
+@login_required
 def temp_links():
     # Retrieve all temporary links from the database
     links = TempLink.query.all()

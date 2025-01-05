@@ -18,9 +18,10 @@ class User(db.Model, UserMixin):
 class TempLink(db.Model):
     """Model representing a temporary link."""
     id = db.Column(db.Integer, primary_key=True)
+    novel_name = db.Column(db.String(255), nullable=False)
+    chapter_range = db.Column(db.String(255), nullable=True)
     link = db.Column(db.String(255), nullable=False)
     expiration_date = db.Column(db.DateTime, nullable=False)
-    
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     def is_expired(self):

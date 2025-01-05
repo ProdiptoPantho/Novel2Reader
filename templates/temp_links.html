@@ -8,7 +8,8 @@
         <table class="table">
             <thead>
                 <tr>
-                    <th>ID</th>
+                    <th>Novel</th>
+                    <th>Chapters</th>
                     <th>Link</th>
                     <th>Expiration Date</th>
                     <th>Status</th>
@@ -17,7 +18,9 @@
             <tbody>
                 {% for link in links %}
                     <tr>
-                        <td><a href="{{ link.link }}" target="_blank">{{ link.link }}</a></td>
+                        <td>{{ link.novel_name }}</td>
+                        <td>{{ link.chapter_range }}</td>
+                        <td><a href="{{ link.link }}" target="_blank">Click here</a></td>
                         <td>{{ link.expiration_date.strftime('%Y-%m-%d %H:%M:%S') }}</td>
                         <td>
                             {% if link.is_expired() %}
