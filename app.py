@@ -89,6 +89,7 @@ def download():
         link = request.form["link"]
         novel_name = request.form['novel_name']
         chapter_range = request.form['chapter_range']
+        chapter_range = chapter_range.replace('-', ' - ')
         cr = chapter_range.replace('-', ' ')
         format = request.form['format']
 
