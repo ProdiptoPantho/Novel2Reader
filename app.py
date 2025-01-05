@@ -202,7 +202,7 @@ signal.signal(signal.SIGINT, signal_handler)
 @login_required
 def temp_links():
     # Retrieve all temporary links from the database
-    links = TempLink.query.all()
+    links = TempLink.query.filter_by(user_id=current_user.id).all()
     return render_template('temp_links.html', links=links)  # Pass links to the template
 
 
